@@ -2,13 +2,13 @@
 
 namespace ContainerTools;
 
-use ContainerTools\Container\Dumper;
+use ContainerTools\Container\Filesystem;
 use ContainerTools\Container\Loader as ContainerLoader;
 use ContainerTools\Configuration\Loader as ConfigurationLoader;
 use Symfony\Component\DependencyInjection\ContainerBuilder as SymfonyContainerBuilder;
 use ContainerTools\Container\Builder;
 use Symfony\Component\DependencyInjection\Container;
-use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Filesystem\Filesystem as SymfonyFilesystem;
 
 class ContainerGenerator
 {
@@ -23,14 +23,11 @@ class ContainerGenerator
     private $configuration;
 
     /**
-     * @param string $containerFilePath
-     * @param array $configurationFolders
-     * @param bool $debug
-     * @param string $servicesFormat
+     * @param Configuration $configuration
      */
-    public function __construct($containerFilePath, array $configurationFolders, $debug, $servicesFormat = 'xml')
+    public function __construct(Configuration $configuration)
     {
-        $this->configuration = Configuration::fromParameters($containerFilePath, $configurationFolders, $debug, $servicesFormat);
+        $this->configuration = $configuration;
     }
 
     /**
@@ -49,9 +46,8 @@ class ContainerGenerator
         $builder = new Builder(
             new ConfigurationLoader(),
             new SymfonyContainerBuilder(),
-            new Dumper($this->configuration->getContainerFilePath()),
             new ContainerLoader(),
-            new Filesystem()
+            new Filesystem(new SymfonyFilesystem(), $this->configuration->getContainerFilePath())
         );
 
         return $builder->build($this->configuration);

@@ -4,8 +4,9 @@ namespace ContainerTools\Container;
 
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Dumper\PhpDumper as ContainerDumper;
+use Symfony\Component\Filesystem\Filesystem as SymfonyFilesystem;
 
-class Dumper
+class Filesystem
 {
     /**
      * @var string
@@ -13,11 +14,18 @@ class Dumper
     private $containerFilePath;
 
     /**
+     * @var SymfonyFilesystem
+     */
+    private $filesystem;
+
+    /**
+     * @param SymfonyFilesystem $filesystem
      * @param string $containerFilePath
      */
-    public function __construct($containerFilePath)
+    public function __construct(SymfonyFilesystem $filesystem, $containerFilePath)
     {
         $this->containerFilePath = $containerFilePath;
+        $this->filesystem = $filesystem;
     }
 
     /**
@@ -27,6 +35,12 @@ class Dumper
     {
         $dumper = new ContainerDumper($containerBuilder);
 
-        file_put_contents($this->containerFilePath, $dumper->dump());
+        $this->filesystem->dumpFile($this->containerFilePath, $dumper->dump());
     }
+
+    public function exists($file)
+    {
+        $this->filesystem->exists($file);
+    }
+
 }

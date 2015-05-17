@@ -2,6 +2,9 @@
 
 namespace ContainerTools;
 
+
+use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
+
 class Configuration
 {
     /**
@@ -23,6 +26,11 @@ class Configuration
      * @var string
      */
     private $servicesFormat;
+
+    /**
+     * @var array CompilerPassInterface
+     */
+    private $compilerPasses = array();
 
     /**
      * @param string $containerFilePath
@@ -80,5 +88,21 @@ class Configuration
     public function getServicesFormat()
     {
         return $this->servicesFormat;
+    }
+
+    /**
+     * @return array CompilerPassInterface
+     */
+    public function getCompilerPasses()
+    {
+        return $this->compilerPasses;
+    }
+
+    /**
+     * @param CompilerPassInterface $compilerPass
+     */
+    public function addCompilerPass(CompilerPassInterface $compilerPass)
+    {
+        $this->compilerPasses[] = $compilerPass;
     }
 }

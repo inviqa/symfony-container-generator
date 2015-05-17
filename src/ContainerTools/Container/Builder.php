@@ -7,7 +7,7 @@ use ContainerTools\Configuration\Loader as ConfigLoader;
 use ContainerTools\Container\Loader as ContainerLoader;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\DependencyInjection\ContainerBuilder as SymfonyContainerBuilder;
-use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 class Builder
 {
@@ -39,20 +39,17 @@ class Builder
     /**
      * @param ConfigLoader $loader
      * @param SymfonyContainerBuilder $containerBuilder
-     * @param Dumper $dumper
      * @param Loader $containerLoader
      * @param Filesystem $filesystem
      */
     public function __construct(
         ConfigLoader $loader,
         SymfonyContainerBuilder $containerBuilder,
-        Dumper $dumper,
         ContainerLoader $containerLoader,
         Filesystem $filesystem
     ) {
         $this->loader = $loader;
         $this->containerBuilder = $containerBuilder;
-        $this->dumper = $dumper;
         $this->containerLoader = $containerLoader;
         $this->filesystem = $filesystem;
     }
@@ -74,7 +71,7 @@ class Builder
                 $container = $this->containerLoader->requireOnce($configuration->getContainerFilePath());
             } else {
                 $container = $this->compile($configuration);
-                $this->dumper->dump($container);
+                $this->filesystem->dump($container);
             }
         }
 
@@ -99,14 +96,20 @@ class Builder
     private function compile(Configuration $configuration)
     {
         $container = $this->buildContainer($configuration);
+
+        foreach ($configuration->getCompilerPasses() as $compilerPass) {
+            $container->addCompilerPass($compilerPass);
+        }
+
         $container->compile();
+
 
         return $container;
     }
 
     /**
      * @param Configuration $configuration
-     * @return Container
+     * @return ContainerBuilder
      */
     private function buildContainer(Configuration $configuration)
     {
