@@ -1,0 +1,23 @@
+{
+    "name": "inviqa/symfony-container-builder",
+    "description": "Generic Symfony DI Container Builder",
+
+    "require": {
+        "php": ">=5.3.3",
+        "symfony/filesystem": "^2.6",
+        "symfony/dependency-injection": "3.0.*@dev",
+        "symfony/config": "^2.6"
+    },
+    "autoload": {
+        "psr-0": {
+            "ContainerTools": "src/",
+            "": "src"
+        }
+    },
+    "require-dev": {
+        "phpspec/phpspec": "^2.2"
+    },
+    "config": {
+        "bin-dir": "bin"
+    }
+}
