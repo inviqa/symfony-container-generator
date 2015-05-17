@@ -9,7 +9,7 @@ Instantiate a new ContainerGenerator with these aguments:
 - Debug/Development: When set to true, container.php is not generated or cached
 
 ```php
-        $generator = new ContainerGenerator(
+        $generator = new \ContainerTools\ContainerGenerator(
             '/var/cache/container.php',
             ['/etc/services/', '/project/services'],
             $debug = true
