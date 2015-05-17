@@ -26,10 +26,11 @@ class ContainerGenerator
      * @param string $containerFilePath
      * @param array $configurationFolders
      * @param bool $debug
+     * @param string $servicesFormat
      */
-    public function __construct($containerFilePath, array $configurationFolders, $debug = true)
+    public function __construct($containerFilePath, array $configurationFolders, $debug, $servicesFormat = 'xml')
     {
-        $this->configuration = Configuration::fromParameters($containerFilePath, $configurationFolders, $debug);
+        $this->configuration = Configuration::fromParameters($containerFilePath, $configurationFolders, $debug, $servicesFormat);
     }
 
     /**

@@ -36,6 +36,13 @@ class Builder
      */
     private $filesystem;
 
+    /**
+     * @param ConfigLoader $loader
+     * @param SymfonyContainerBuilder $containerBuilder
+     * @param Dumper $dumper
+     * @param Loader $containerLoader
+     * @param Filesystem $filesystem
+     */
     public function __construct(
         ConfigLoader $loader,
         SymfonyContainerBuilder $containerBuilder,
@@ -93,7 +100,6 @@ class Builder
     {
         $container = $this->buildContainer($configurationFolders);
         $container->compile();
-
 
         return $container;
     }

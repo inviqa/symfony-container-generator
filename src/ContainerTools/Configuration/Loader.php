@@ -2,22 +2,32 @@
 
 namespace ContainerTools\Configuration;
 
+use ContainerTools\Configuration;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 
 class Loader
 {
+    /**
+     * @var array
+     */
     private $serviceConfigs;
 
     /**
-     * @param array $serviceConfigs
+     * @var string
+     */
+    private $servicesFormat;
+
+    /**
+     * @param Configuration $configuration
      *
      * @return $this
      */
-    public function load(array $serviceConfigs)
+    public function load(Configuration $configuration)
     {
-        $this->serviceConfigs = $serviceConfigs;
+        $this->serviceConfigs = $configuration->getServicesFolders();
+        $this->servicesFormat = $configuration->getServicesFormat();
 
         return $this;
     }
@@ -29,6 +39,6 @@ class Loader
     {
         $loader = new YamlFileLoader($containerBuilder, new FileLocator($this->serviceConfigs));
 
-        $loader->load('services.yml');
+        $loader->load('services.' . $this->servucesFormat);
     }
 } 
