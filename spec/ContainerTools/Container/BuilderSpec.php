@@ -13,8 +13,6 @@ use Symfony\Component\Filesystem\Filesystem;
 
 class BuilderSpec extends ObjectBehavior
 {
-    private $configFolders = [];
-
     private $containerFile = 'container.php';
 
     function let(
@@ -22,9 +20,14 @@ class BuilderSpec extends ObjectBehavior
         ContainerBuilder $containerBuilder,
         Dumper $dumper,
         ContainerLoader $containerLoader,
-        Filesystem $filesystem
+        Filesystem $filesystem,
+        Configuration $configuration
     ) {
-        $loader->load($this->configFolders)->willReturn($loader);
+        $configuration->getServicesFormat()->willReturn('xml');
+        $configuration->getServicesFolders()->willReturn([]);
+        $configuration->getContainerFilePath()->willReturn($this->containerFile);
+
+        $loader->load($configuration)->willReturn($loader);
 
         $this->beConstructedWith($loader, $containerBuilder, $dumper, $containerLoader, $filesystem);
     }
@@ -34,10 +37,10 @@ class BuilderSpec extends ObjectBehavior
         ContainerBuilder $containerBuilder,
         Dumper $dumper,
         ContainerLoader $containerLoader,
-        Filesystem $filesystem
+        Filesystem $filesystem,
+        Configuration $configuration
     ) {
-        $debug = true;
-
+        $configuration->getDebug()->willReturn(true);
         $filesystem->exists(Argument::any())->willReturn();
 
         $loader->into($containerBuilder)->shouldBeCalled();
@@ -45,8 +48,6 @@ class BuilderSpec extends ObjectBehavior
 
         $dumper->dump($containerBuilder)->shouldNotBeCalled();
         $containerLoader->requireOnce(Argument::any())->shouldNotBeCalled();
-
-        $configuration = Configuration::fromParameters($this->containerFile, $this->configFolders, $debug);
 
         $this->build($configuration);
     }
@@ -57,9 +58,10 @@ class BuilderSpec extends ObjectBehavior
         ContainerBuilder $containerBuilder,
         Dumper $dumper,
         ContainerLoader $containerLoader,
-        Filesystem $filesystem
+        Filesystem $filesystem,
+        Configuration $configuration
     ) {
-        $debug = false;
+        $configuration->getDebug()->willReturn(false);
         $filesystem->exists(Argument::any())->willReturn(false);
 
         $loader->into($containerBuilder)->shouldBeCalled();
@@ -68,21 +70,18 @@ class BuilderSpec extends ObjectBehavior
 
         $containerLoader->requireOnce(Argument::any())->shouldNotBeCalled();
 
-        $configuration = Configuration::fromParameters($this->containerFile, $this->configFolders, $debug);
-
         $this->build($configuration);
     }
-
-
 
     function it_loads_an_existing_container_if_it_exists_when_not_in_debug_mode(
         Loader $loader,
         ContainerBuilder $containerBuilder,
         Dumper $dumper,
         ContainerLoader $containerLoader,
-        Filesystem $filesystem
+        Filesystem $filesystem,
+        Configuration $configuration
     ) {
-        $debug = false;
+        $configuration->getDebug()->willReturn(false);
         $filesystem->exists(Argument::any())->willReturn(true);
 
         $loader->into($containerBuilder)->shouldNotBeCalled();
@@ -90,8 +89,6 @@ class BuilderSpec extends ObjectBehavior
         $dumper->dump($containerBuilder)->shouldNotBeCalled();
 
         $containerLoader->requireOnce($this->containerFile)->shouldBeCalled();
-
-        $configuration = Configuration::fromParameters($this->containerFile, $this->configFolders, $debug);
 
         $this->build($configuration);
     }

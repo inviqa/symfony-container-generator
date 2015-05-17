@@ -68,12 +68,12 @@ class Builder
         $isDebug = $configuration->getDebug();
 
         if ($isDebug) {
-            $container = $this->compile($configuration->getServicesFolders());
+            $container = $this->compile($configuration);
         } else {
             if ($containerHasBeenBuilt) {
                 $container = $this->containerLoader->requireOnce($configuration->getContainerFilePath());
             } else {
-                $container = $this->compile($configuration->getServicesFolders());
+                $container = $this->compile($configuration);
                 $this->dumper->dump($container);
             }
         }
@@ -92,25 +92,26 @@ class Builder
     }
 
     /**
-     * @param array $configurationFolders
+     * @param Configuration $configuration
      *
      * @return ContainerBuilder
      */
-    private function compile(array $configurationFolders)
+    private function compile(Configuration $configuration)
     {
-        $container = $this->buildContainer($configurationFolders);
+        $container = $this->buildContainer($configuration);
         $container->compile();
 
         return $container;
     }
 
     /**
+     * @param Configuration $configuration
      * @return Container
      */
-    private function buildContainer(array $configurationFolders)
+    private function buildContainer(Configuration $configuration)
     {
         $this->loader
-            ->load($configurationFolders)
+            ->load($configuration)
             ->into($this->containerBuilder);
 
         return $this->containerBuilder;

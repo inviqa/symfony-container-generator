@@ -5,6 +5,7 @@ namespace ContainerTools\Configuration;
 use ContainerTools\Configuration;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 
 class Loader
@@ -37,8 +38,8 @@ class Loader
      */
     public function into(ContainerBuilder $containerBuilder)
     {
-        $loader = new YamlFileLoader($containerBuilder, new FileLocator($this->serviceConfigs));
+        $loader = new XmlFileLoader($containerBuilder, new FileLocator($this->serviceConfigs));
 
-        $loader->load('services.' . $this->servucesFormat);
+        $loader->load('services.' . $this->servicesFormat);
     }
 } 
