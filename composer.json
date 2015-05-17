@@ -1,5 +1,5 @@
 {
-    "name": "inviqa/symfony-container-builder",
+    "name": "inviqa/symfony-container-generator",
     "description": "Generic Symfony DI Container Builder",
 
     "require": {
