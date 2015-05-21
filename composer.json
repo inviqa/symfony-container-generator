@@ -6,7 +6,7 @@
         "php": ">=5.3.3",
         "symfony/filesystem": "^2.6",
         "symfony/dependency-injection": "^2.6",
-        "symfony/config": "^2.6"
+        "symfony/config": "2.6"
     },
     "autoload": {
         "psr-0": {
