@@ -40,7 +40,6 @@ class Filesystem
 
     public function exists($file)
     {
-        $this->filesystem->exists($file);
+        return $this->filesystem->exists($file);
     }
-
 }

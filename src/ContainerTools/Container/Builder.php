@@ -22,11 +22,6 @@ class Builder
     private $containerBuilder;
 
     /**
-     * @var Dumper
-     */
-    private $dumper;
-
-    /**
      * @var Loader
      */
     private $containerLoader;
@@ -102,7 +97,6 @@ class Builder
         }
 
         $container->compile();
-
 
         return $container;
     }
