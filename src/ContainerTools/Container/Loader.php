@@ -2,6 +2,8 @@
 
 namespace ContainerTools\Container;
 
+use Symfony\Component\DependencyInjection\ContainerBuilder as SymfonyContainerBuilder;
+
 class Loader 
 {
     /**
@@ -9,10 +11,11 @@ class Loader
      *
      * @return \ProjectServiceContainer
      */
-    public function requireOnce($containerPath)
+    public function loadFrom($containerPath)
     {
         include_once $containerPath;
 
         return new \ProjectServiceContainer();
     }
+
 }

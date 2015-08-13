@@ -23,6 +23,19 @@ class Loader
     private $servicesFormat;
 
     /**
+     * @var ContainerBuilder
+     */
+    private $containerBuilder;
+
+    /**
+     * @param ContainerBuilder $containerBuilder
+     */
+    public function __construct(ContainerBuilder $containerBuilder)
+    {
+        $this->containerBuilder = $containerBuilder;
+    }
+
+    /**
      * @param Configuration $configuration
      *
      * @return $this
@@ -46,5 +59,16 @@ class Loader
         )));
 
         $loader->load('services.' . $this->servicesFormat);
+    }
+
+    /**
+     * @param Configuration $configuration
+     * @return ContainerBuilder
+     */
+    public function loadContainer(Configuration $configuration)
+    {
+        $this->load($configuration)->into($this->containerBuilder);
+
+        return $this->containerBuilder;
     }
 } 
