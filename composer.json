@@ -6,7 +6,7 @@
         "php": ">=5.3.3",
         "symfony/filesystem": "^2.6",
         "symfony/dependency-injection": "^2.6",
-        "symfony/config": "^2.7"
+        "symfony/config": "^2.6"
     },
     "autoload": {
         "psr-0": {
@@ -15,7 +15,9 @@
         }
     },
     "require-dev": {
-        "phpspec/phpspec": "^2.2"
+        "phpspec/phpspec": "^2.2",
+        "bossa/phpspec2-expect": "^1.0",
+        "behat/behat": "^3.0"
     },
     "config": {
         "bin-dir": "bin"

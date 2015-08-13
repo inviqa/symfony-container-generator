@@ -74,7 +74,7 @@ class Builder
     }
 
     /**
-     * @param $cachedContainer
+     * @param string $cachedContainer
      *
      * @return boolean
      */
@@ -114,4 +114,3 @@ class Builder
         return $this->containerBuilder;
     }
 }
-

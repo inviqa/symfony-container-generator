@@ -11,7 +11,7 @@ class Loader
      */
     public function requireOnce($containerPath)
     {
-        require_once $containerPath;
+        include_once $containerPath;
 
         return new \ProjectServiceContainer();
     }
