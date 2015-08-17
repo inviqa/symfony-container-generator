@@ -6,11 +6,12 @@ use Behat\Behat\Context\SnippetAcceptingContext;
 use ContainerTools\Configuration;
 use ContainerTools\ContainerGenerator;
 use Symfony\Component\DependencyInjection\Container;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
  * Defines application features from the specific context.
  */
-class FeatureContext implements Context, SnippetAcceptingContext
+class FeatureContext implements Context
 {
     /**
      * @var Configuration
@@ -67,6 +68,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
     public function iGenerateTheContainer()
     {
         $container = new ContainerGenerator($this->configuration);
+
         $this->generatedContainer = $container->getContainer();
     }
 
@@ -75,7 +77,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
      */
     public function iShouldReceiveAnInstanceOfThatContainer()
     {
-        expect($this->generatedContainer)->toBeAnInstanceOf(Container::class);
+        expect($this->generatedContainer)->toBeAnInstanceOf(ContainerBuilder::class);
     }
 
     /**
@@ -126,7 +128,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
      */
     public function theCachedContainerFileAlreadyExists()
     {
-        $this->iGenerateTheContainer();
+        copy('features/dummy/container.cache.php', 'container.cache.php');
 
         if (!file_exists($this->cachedContainerFile)) {
             throw new RuntimeException(sprintf('Expected cached container file %s to exist.', $this->cachedContainerFile));
@@ -136,9 +138,9 @@ class FeatureContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @Then I should reiceve an instance of the existing container
+     * @Then I should receive an instance of the existing container
      */
-    public function iShouldReiceveAnInstanceOfTheExistingContainer()
+    public function iShouldReceiveAnInstanceOfTheExistingContainer()
     {
         expect($this->generatedContainer)->toBeAnInstanceOf(Container::class);
         expect($this->containerStat)->toBe(stat($this->cachedContainerFile));

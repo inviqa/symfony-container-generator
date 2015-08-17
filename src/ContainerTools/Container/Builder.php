@@ -50,7 +50,7 @@ class Builder
         $containerHasBeenBuilt = $this->filesystem->exists($containerFilePath);
         $isDebug = $configuration->getDebug();
 
-        if ($isDebug && !$containerHasBeenBuilt) {
+        if ($isDebug) {
             $container = $this->compile($configuration);
         } else if ($containerHasBeenBuilt) {
             $container = $this->containerLoader->loadFrom($containerFilePath);
