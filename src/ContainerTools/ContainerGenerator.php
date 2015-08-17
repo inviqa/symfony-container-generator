@@ -35,7 +35,7 @@ class ContainerGenerator
      */
     public function getContainer()
     {
-        return $this->container ?: $this->buildContainer();
+        return $this->container = $this->container ?: $this->buildContainer();
     }
 
     /**
