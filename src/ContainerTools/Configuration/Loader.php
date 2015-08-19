@@ -53,17 +53,26 @@ class Loader
      */
     public function into(ContainerBuilder $containerBuilder)
     {
+        $fileLocator = new FileLocator($this->serviceConfigs);
+
         $loader = new DelegatingLoader(new LoaderResolver(array(
-            new XmlFileLoader($containerBuilder, new FileLocator($this->serviceConfigs)),
-            new YamlFileLoader($containerBuilder, new FileLocator($this->serviceConfigs)),
+            new XmlFileLoader($containerBuilder, $fileLocator),
+            new YamlFileLoader($containerBuilder, $fileLocator),
         )));
 
         $loader->load('services.' . $this->servicesFormat);
-        
+
+        $testServicesFiles = 'services_test.' . $this->servicesFormat;
+        $testServiceFilesExist = true;
+
         try {
-            $loader->load('services_test.' . $this->servicesFormat);
+            $fileLocator->locate($testServicesFiles);
         } catch (InvalidArgumentException $e) {
-            // Don't do anything if the services test file can't be loaded
+            $testServiceFilesExist = false;
+        }
+
+        if ($testServiceFilesExist) {
+            $loader->load($testServicesFiles);
         }
     }
 
