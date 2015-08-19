@@ -10,7 +10,6 @@ $generatorConfiguration = ContainerTools\Configuration::fromParameters(
     true,                                    // debug mode - doesn't cache or generate container.php if true
     'xml'                                    // services extension 'xml' or 'yml'
 );
-Instantiate a new ContainerGenerator:
 ```
 
 Instantiate a ContainerGenerator, and fetch the container from it:
