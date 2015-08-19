@@ -33,6 +33,11 @@ class Configuration
     private $compilerPasses = array();
 
     /**
+     * @var bool
+     */
+    private $testEnvironment = false;
+
+    /**
      * @param string $containerFilePath
      * @param array $servicesFolders
      * @param boolean $debug
@@ -88,6 +93,22 @@ class Configuration
     public function getServicesFormat()
     {
         return $this->servicesFormat;
+    }
+
+    /**
+     * @param bool $isTestEnv
+     */
+    public function setTestEnvironment($isTestEnv)
+    {
+        $this->testEnvironment = (bool) $isTestEnv;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isTestEnvironment()
+    {
+        return (bool) $this->testEnvironment;
     }
 
     /**

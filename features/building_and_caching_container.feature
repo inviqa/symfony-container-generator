@@ -20,3 +20,4 @@ Feature: Generating, building and caching a container
     And the cached container file already exists
     When I generate the container
     Then I should receive an instance of the existing container
+

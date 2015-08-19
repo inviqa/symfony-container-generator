@@ -29,6 +29,11 @@ class Loader
     private $containerBuilder;
 
     /**
+     * @var bool
+     */
+    private $isTestEnvironment;
+
+    /**
      * @param ContainerBuilder $containerBuilder
      */
     public function __construct(ContainerBuilder $containerBuilder)
@@ -45,6 +50,7 @@ class Loader
     {
         $this->serviceConfigs = $configuration->getServicesFolders();
         $this->servicesFormat = $configuration->getServicesFormat();
+        $this->isTestEnvironment = $configuration->isTestEnvironment();
 
         return $this;
     }
@@ -63,22 +69,14 @@ class Loader
 
         $loader->load('services.' . $this->servicesFormat);
 
-        $testServicesFiles = 'services_test.' . $this->servicesFormat;
-        $testServiceFilesExist = true;
-
-        try {
-            $fileLocator->locate($testServicesFiles);
-        } catch (InvalidArgumentException $e) {
-            $testServiceFilesExist = false;
-        }
-
-        if ($testServiceFilesExist) {
-            $loader->load($testServicesFiles);
+        if ($this->isTestEnvironment) {
+            $loader->load('services_test.' . $this->servicesFormat);
         }
     }
 
     /**
      * @param Configuration $configuration
+     *
      * @return ContainerBuilder
      */
     public function loadContainer(Configuration $configuration)
@@ -87,4 +85,4 @@ class Loader
 
         return $this->containerBuilder;
     }
-} 
+}

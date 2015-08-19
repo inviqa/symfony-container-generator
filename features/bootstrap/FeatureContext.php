@@ -34,6 +34,11 @@ class FeatureContext implements Context
     private $containerStat = 0;
 
     /**
+     * @var Exception
+     */
+    private $generatorException;
+
+    /**
      * Initializes context.
      *
      * Every scenario gets its own context instance.
@@ -52,6 +57,10 @@ class FeatureContext implements Context
         if (file_exists($this->cachedContainerFile)) {
             unlink($this->cachedContainerFile);
         }
+
+        if (file_exists('features/etc/services_test.xml')) {
+            unlink('features/etc/services_test.xml');
+        }
     }
 
     /**
@@ -69,7 +78,11 @@ class FeatureContext implements Context
     {
         $container = new ContainerGenerator($this->configuration);
 
-        $this->generatedContainer = $container->getContainer();
+        try {
+            $this->generatedContainer = $container->getContainer();
+        } catch (Exception $e) {
+            $this->generatorException = $e;
+        }
     }
 
     /**
@@ -144,5 +157,66 @@ class FeatureContext implements Context
     {
         expect($this->generatedContainer)->toBeAnInstanceOf(Container::class);
         expect($this->containerStat)->toBe(stat($this->cachedContainerFile));
+    }
+
+    /**
+     * @Given I have test services
+     */
+    public function iHaveTestServices()
+    {
+        copy('features/dummy/services_test.xml', 'features/etc/services_test.xml');
+    }
+
+    /**
+     * @Given the test environment is set
+     */
+    public function theTestEnvironemtnIsSet()
+    {
+        $this->configuration = Configuration::fromParameters($this->cachedContainerFile, ['features/etc/'], true, 'xml');
+
+        $this->configuration->setTestEnvironment(true);
+    }
+
+    /**
+     * @Then the test services should be available
+     */
+    public function theTestServicesShouldBeAvailable()
+    {
+        expect($this->generatedContainer->has('test_service'))->toBe(true);
+    }
+
+    /**
+     * @Given I have do not have test services
+     */
+    public function iHaveDoNotHaveTestServices()
+    {
+        expect(file_exists('features/etc/services_test.xml'))->toBe(false);
+    }
+
+    /**
+     * @Then an exception should be thrown
+     */
+    public function anExceptionShouldBeThrown()
+    {
+        expect($this->generatorException)->toBeAnInstanceOf(Exception::class);
+    }
+
+    /**
+     * @Given the test environment is not set
+     */
+    public function theTestEnvironmentIsNotSet()
+    {
+        $this->configuration = Configuration::fromParameters($this->cachedContainerFile, ['features/etc/'], true, 'xml');
+
+        $this->configuration->setTestEnvironment(false);
+    }
+
+    /**
+     * @Then the test services should not be available
+     */
+    public function theTestServicesShouldNotBeAvailable()
+    {
+        expect($this->generatedContainer->has('test_service'))->toBe(false);
+
     }
 }
