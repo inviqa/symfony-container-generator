@@ -59,6 +59,12 @@ class Loader
         )));
 
         $loader->load('services.' . $this->servicesFormat);
+        
+        try {
+            $loader->load('services_test.' . $this->servicesFormat);
+        } catch (InvalidArgumentException $e) {
+            // Don't do anything if the services test file can't be loaded
+        }
     }
 
     /**
