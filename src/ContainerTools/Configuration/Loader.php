@@ -3,13 +3,8 @@
 namespace ContainerTools\Configuration;
 
 use ContainerTools\Configuration;
-use Symfony\Component\Config\FileLocator;
-use Symfony\Component\Config\Loader\DelegatingLoader;
-use Symfony\Component\Config\Loader\LoaderResolver;
+use Symfony\Component\Config\Exception\FileLoaderLoadException;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
-use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
-use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 
 class Loader
 {
@@ -34,44 +29,28 @@ class Loader
     private $isTestEnvironment;
 
     /**
-     * @param ContainerBuilder $containerBuilder
+     * @var DelegatingLoaderFactory
      */
-    public function __construct(ContainerBuilder $containerBuilder)
+    private $delegatingLoaderFactory;
+
+    /**
+     * @param ContainerBuilder $containerBuilder
+     * @param DelegatingLoaderFactory $delegatingLoaderFactory
+     */
+    public function __construct(ContainerBuilder $containerBuilder, DelegatingLoaderFactory $delegatingLoaderFactory)
     {
         $this->containerBuilder = $containerBuilder;
+        $this->delegatingLoaderFactory = $delegatingLoaderFactory;
     }
 
     /**
      * @param Configuration $configuration
-     *
-     * @return $this
      */
-    public function load(Configuration $configuration)
+    public function configure(Configuration $configuration)
     {
         $this->serviceConfigs = $configuration->getServicesFolders();
         $this->servicesFormat = $configuration->getServicesFormat();
         $this->isTestEnvironment = $configuration->isTestEnvironment();
-
-        return $this;
-    }
-
-    /**
-     * @param ContainerBuilder $containerBuilder
-     */
-    public function into(ContainerBuilder $containerBuilder)
-    {
-        $fileLocator = new FileLocator($this->serviceConfigs);
-
-        $loader = new DelegatingLoader(new LoaderResolver(array(
-            new XmlFileLoader($containerBuilder, $fileLocator),
-            new YamlFileLoader($containerBuilder, $fileLocator),
-        )));
-
-        $loader->load('services.' . $this->servicesFormat);
-
-        if ($this->isTestEnvironment) {
-            $loader->load('services_test.' . $this->servicesFormat);
-        }
     }
 
     /**
@@ -81,8 +60,26 @@ class Loader
      */
     public function loadContainer(Configuration $configuration)
     {
-        $this->load($configuration)->into($this->containerBuilder);
+        $this->configure($configuration);
+
+        array_walk($this->serviceConfigs, array($this, 'process'));
 
         return $this->containerBuilder;
+    }
+
+    /**
+     * @param $path
+     *
+     * @throws FileLoaderLoadException
+     */
+    private function process($path)
+    {
+        $loader = $this->delegatingLoaderFactory->create($this->containerBuilder, $path);
+
+        $loader->load('services.' . $this->servicesFormat);
+
+        if ($this->isTestEnvironment) {
+            $loader->load('services_test.' . $this->servicesFormat);
+        }
     }
 }

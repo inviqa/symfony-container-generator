@@ -11,7 +11,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 /**
  * Defines application features from the specific context.
  */
-class FeatureContext implements Context
+class FeatureContext implements Context, SnippetAcceptingContext
 {
     /**
      * @var Configuration
@@ -218,5 +218,25 @@ class FeatureContext implements Context
     {
         expect($this->generatedContainer->has('test_service'))->toBe(false);
 
+    }
+
+    /**
+     * @Given I have configured different services in both :folder1 and :folder2
+     */
+    public function iHaveConfiguredServicesInBothAnd($folder1, $folder2)
+    {
+        $folder1 = 'features/'.$folder1;
+        $folder2 = 'features/'.$folder2;
+        $this->configuration = Configuration::fromParameters($this->cachedContainerFile, [$folder1, $folder2], true, 'xml');
+
+    }
+
+    /**
+     * @Then it should contain services from both files
+     */
+    public function itShouldContainServicesFromBothFiles()
+    {
+        expect($this->generatedContainer->has('my_service1'))->toBe(true);
+        expect($this->generatedContainer->has('my_service2'))->toBe(true);
     }
 }

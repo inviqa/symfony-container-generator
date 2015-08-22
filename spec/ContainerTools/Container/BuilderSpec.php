@@ -25,8 +25,6 @@ class BuilderSpec extends ObjectBehavior
         $configuration->getContainerFilePath()->willReturn($this->containerFile);
         $configuration->getCompilerPasses()->willReturn([]);
 
-        $loader->load($configuration)->willReturn($loader);
-
         $this->beConstructedWith($loader, $containerLoader, $filesystem);
     }
 

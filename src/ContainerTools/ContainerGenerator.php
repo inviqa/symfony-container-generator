@@ -2,6 +2,7 @@
 
 namespace ContainerTools;
 
+use ContainerTools\Configuration\DelegatingLoaderFactory;
 use ContainerTools\Container\Filesystem;
 use ContainerTools\Container\Loader as ContainerLoader;
 use ContainerTools\Configuration\Loader as ConfigurationLoader;
@@ -44,7 +45,7 @@ class ContainerGenerator
     private function buildContainer()
     {
         $builder = new Builder(
-            new ConfigurationLoader(new SymfonyContainerBuilder()),
+            new ConfigurationLoader(new SymfonyContainerBuilder(), new DelegatingLoaderFactory()),
             new ContainerLoader(),
             new Filesystem(new SymfonyFilesystem(), $this->configuration->getContainerFilePath())
         );
