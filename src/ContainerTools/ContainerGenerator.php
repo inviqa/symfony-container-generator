@@ -45,7 +45,7 @@ class ContainerGenerator
     private function buildContainer()
     {
         $builder = new Builder(
-            new ConfigurationLoader(new SymfonyContainerBuilder(), new DelegatingLoaderFactory()),
+            new ConfigurationLoader(new SymfonyContainerBuilder(), new DelegatingLoaderFactory(), new SymfonyFilesystem()),
             new ContainerLoader(),
             new Filesystem(new SymfonyFilesystem(), $this->configuration->getContainerFilePath())
         );

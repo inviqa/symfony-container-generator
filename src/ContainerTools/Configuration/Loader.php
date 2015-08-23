@@ -3,6 +3,7 @@
 namespace ContainerTools\Configuration;
 
 use ContainerTools\Configuration;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Config\Exception\FileLoaderLoadException;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
@@ -34,13 +35,24 @@ class Loader
     private $delegatingLoaderFactory;
 
     /**
+     * @var Filesystem
+     */
+    private $filesystem;
+
+    /**
      * @param ContainerBuilder $containerBuilder
      * @param DelegatingLoaderFactory $delegatingLoaderFactory
+     * @param Filesystem $filesystem
      */
-    public function __construct(ContainerBuilder $containerBuilder, DelegatingLoaderFactory $delegatingLoaderFactory)
+    public function __construct(
+        ContainerBuilder $containerBuilder,
+        DelegatingLoaderFactory $delegatingLoaderFactory,
+        Filesystem $filesystem
+    )
     {
         $this->containerBuilder = $containerBuilder;
         $this->delegatingLoaderFactory = $delegatingLoaderFactory;
+        $this->filesystem = $filesystem;
     }
 
     /**
@@ -76,10 +88,15 @@ class Loader
     {
         $loader = $this->delegatingLoaderFactory->create($this->containerBuilder, $path);
 
-        $loader->load('services.' . $this->servicesFormat);
+        $servicesFile = 'services.' . $this->servicesFormat;
+        $servicesTestFile = 'services_test.' . $this->servicesFormat;
 
-        if ($this->isTestEnvironment) {
-            $loader->load('services_test.' . $this->servicesFormat);
+        if ($this->filesystem->exists($path . '/' . $servicesFile)) {
+            $loader->load($servicesFile);
+        }
+
+        if ($this->isTestEnvironment && $this->filesystem->exists($path . '/' . $servicesTestFile)) {
+            $loader->load($servicesTestFile);
         }
     }
 }
