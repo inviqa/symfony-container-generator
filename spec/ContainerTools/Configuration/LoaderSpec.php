@@ -43,6 +43,25 @@ class LoaderSpec extends ObjectBehavior
         $delegatingLoader->load('services.xml')->shouldHaveBeenCalled();
     }
 
+
+    function it_skips_loading_services_if_none_exist(
+        Configuration $configuration,
+        ContainerBuilder $containerBuilder,
+        DelegatingLoaderFactory $delegatingLoaderFactory,
+        DelegatingLoader $delegatingLoader,
+        Filesystem $filesystem
+    ) {
+        $configuration->getServicesFolders()->willReturn(['etc1']);
+
+        $delegatingLoaderFactory->create($containerBuilder, 'etc1')->willReturn($delegatingLoader);
+        $filesystem->exists('etc1/services.xml')->willReturn(false);
+
+        $this->loadContainer($configuration)->shouldReturnAnInstanceOf(Container::class);
+
+        $delegatingLoader->load('services.xml')->shouldNotHaveBeenCalled();
+    }
+
+
     function it_loads_services_into_a_container_from_multiple_paths(
         Configuration $configuration,
         ContainerBuilder $containerBuilder,
@@ -89,5 +108,27 @@ class LoaderSpec extends ObjectBehavior
 
         $delegatingLoader1->load('services_test.xml')->shouldHaveBeenCalled();
         $delegatingLoader2->load('services_test.xml')->shouldHaveBeenCalled();
+    }
+
+
+    function it_skips_loading_test_services_if_none_exist(
+        Configuration $configuration,
+        ContainerBuilder $containerBuilder,
+        DelegatingLoaderFactory $delegatingLoaderFactory,
+        DelegatingLoader $delegatingLoader,
+        Filesystem $filesystem
+    ) {
+        $configuration->getServicesFolders()->willReturn(['etc1']);
+        $configuration->isTestEnvironment()->willReturn(true);
+
+        $delegatingLoaderFactory->create($containerBuilder, 'etc1')->willReturn($delegatingLoader);
+        $filesystem->exists('etc1/services.xml')->willReturn(true);
+        $filesystem->exists('etc1/services_test.xml')->willReturn(false);
+
+        $this->loadContainer($configuration)->shouldReturnAnInstanceOf(Container::class);
+
+        $delegatingLoader->load('services.xml')->shouldHaveBeenCalled();
+
+        $delegatingLoader->load('services_test.xml')->shouldNotHaveBeenCalled();
     }
 }
