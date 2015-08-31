@@ -3,7 +3,6 @@
 namespace ContainerTools\Container;
 
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Dumper\PhpDumper as ContainerDumper;
 use Symfony\Component\Filesystem\Filesystem as SymfonyFilesystem;
 
 class Filesystem
@@ -19,13 +18,20 @@ class Filesystem
     private $filesystem;
 
     /**
+     * @var ContainerDumperFactory
+     */
+    private $dumperFactory;
+
+    /**
      * @param SymfonyFilesystem $filesystem
+     * @param ContainerDumperFactory $dumperFactory
      * @param string $containerFilePath
      */
-    public function __construct(SymfonyFilesystem $filesystem, $containerFilePath)
+    public function __construct(SymfonyFilesystem $filesystem, ContainerDumperFactory $dumperFactory, $containerFilePath)
     {
         $this->containerFilePath = $containerFilePath;
         $this->filesystem = $filesystem;
+        $this->dumperFactory = $dumperFactory;
     }
 
     /**
@@ -33,8 +39,7 @@ class Filesystem
      */
     public function dump(ContainerBuilder $containerBuilder)
     {
-        $dumper = new ContainerDumper($containerBuilder);
-
+        $dumper = $this->dumperFactory->create($containerBuilder);
         $this->filesystem->dumpFile($this->containerFilePath, $dumper->dump());
     }
 

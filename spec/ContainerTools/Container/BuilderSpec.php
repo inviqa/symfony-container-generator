@@ -25,7 +25,7 @@ class BuilderSpec extends ObjectBehavior
         $configuration->getContainerFilePath()->willReturn($this->containerFile);
         $configuration->getCompilerPasses()->willReturn([]);
 
-        $this->beConstructedWith($loader, $containerLoader, $filesystem);
+        $this->beConstructedWith($loader, $containerLoader, $filesystem, $configuration);
     }
 
     function it_does_not_cache_the_container_when_in_debug_mode(
@@ -44,7 +44,7 @@ class BuilderSpec extends ObjectBehavior
         $filesystem->dump($containerBuilder)->shouldNotBeCalled();
         $containerLoader->loadFrom(Argument::any())->shouldNotBeCalled();
 
-        $this->build($configuration);
+        $this->build()->shouldReturn($containerBuilder);
     }
 
 
@@ -64,7 +64,7 @@ class BuilderSpec extends ObjectBehavior
 
         $containerLoader->loadFrom(Argument::any())->shouldNotBeCalled();
 
-        $this->build($configuration);
+        $this->build()->shouldReturn($containerBuilder);
     }
 
     function it_loads_an_existing_container_if_it_exists_when_not_in_debug_mode(
@@ -78,8 +78,8 @@ class BuilderSpec extends ObjectBehavior
 
         $filesystem->dump($containerBuilder)->shouldNotBeCalled();
 
-        $containerLoader->loadFrom($this->containerFile)->shouldBeCalled();
+        $containerLoader->loadFrom($this->containerFile)->willReturn($containerBuilder);
 
-        $this->build($configuration);
+        $this->build()->shouldReturn($containerBuilder);
     }
 }
