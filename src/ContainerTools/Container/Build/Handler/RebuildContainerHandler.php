@@ -1,7 +1,9 @@
 <?php
 
-namespace ContainerTools\Container\Build;
+namespace ContainerTools\Container\Build\Handler;
 
+use ContainerTools\Container\Build\Handler;
+use ContainerTools\Container\Build\Request;
 use ContainerTools\Container\Compiler;
 use ContainerTools\Container\Filesystem;
 

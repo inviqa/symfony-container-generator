@@ -3,25 +3,21 @@
 namespace ContainerTools\Container;
 
 use ContainerTools\Configuration;
-use ContainerTools\Container\Build\BuildChainHandler;
-use ContainerTools\Container\Build\BuildHandler;
-use ContainerTools\Container\Build\ContainerAlreadyBuiltHandler;
-use ContainerTools\Container\Build\DebugModeHandler;
-use ContainerTools\Container\Build\RebuildContainerHandler;
+use ContainerTools\Container\Build\BuildChain;
 use ContainerTools\Container\Build\Request;
 use Symfony\Component\DependencyInjection\Container;
 
 class Builder
 {
     /**
-     * @var BuildHandler
+     * @var BuildChain
      */
     private $buildHandler;
 
     /**
-     * @param BuildChainHandler $buildHandler
+     * @param BuildChain $buildHandler
      */
-    public function __construct(BuildChainHandler $buildHandler)
+    public function __construct(BuildChain $buildHandler)
     {
         $this->buildHandler = $buildHandler;
     }

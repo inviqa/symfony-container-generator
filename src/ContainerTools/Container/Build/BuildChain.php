@@ -2,7 +2,11 @@
 
 namespace ContainerTools\Container\Build;
 
-class BuildChainHandler extends Handler
+use ContainerTools\Container\Build\Handler\ContainerAlreadyBuiltHandler;
+use ContainerTools\Container\Build\Handler\DebugModeHandler;
+use ContainerTools\Container\Build\Handler\RebuildContainerHandler;
+
+class BuildChain extends Handler
 {
     /**
      * @param DebugModeHandler $debugModeHandler

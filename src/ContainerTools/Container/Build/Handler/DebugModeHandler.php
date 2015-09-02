@@ -1,8 +1,10 @@
 <?php
 
-namespace ContainerTools\Container\Build;
+namespace ContainerTools\Container\Build\Handler;
 
 use Behat\Testwork\ServiceContainer\ContainerLoader;
+use ContainerTools\Container\Build\Handler;
+use ContainerTools\Container\Build\Request;
 use ContainerTools\Container\Compiler;
 
 class DebugModeHandler extends Handler
@@ -13,8 +15,7 @@ class DebugModeHandler extends Handler
     private $compiler;
 
     /**
-     * DebugModeHandler constructor.
-     * @param ContainerLoader $containerLoader
+     * @param Compiler $compiler
      */
     public function __construct(Compiler $compiler)
     {
