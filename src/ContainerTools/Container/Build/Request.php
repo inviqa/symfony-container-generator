@@ -3,18 +3,22 @@
 namespace ContainerTools\Container\Build;
 
 use ContainerTools\Configuration;
+
 use Symfony\Component\DependencyInjection\Container;
 
 class Request
 {
-    private $container = null;
     /**
-     * @var
+     * @var Container
+     */
+    private $container = null;
+
+    /**
+     * @var Configuration
      */
     private $configuration;
 
     /**
-     * Request constructor.
      * @param Configuration $configuration
      */
     public function __construct(Configuration $configuration)
@@ -23,7 +27,7 @@ class Request
     }
 
     /**
-     * @return null
+     * @return Container
      */
     public function getContainer()
     {
@@ -31,7 +35,7 @@ class Request
     }
 
     /**
-     * @param null $container
+     * @param Container $container
      */
     public function setContainer($container)
     {
@@ -39,12 +43,10 @@ class Request
     }
 
     /**
-     * @return mixed
+     * @return Configuration
      */
     public function getConfiguration()
     {
         return $this->configuration;
     }
-
-
 }

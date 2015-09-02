@@ -61,8 +61,7 @@ class ContainerGenerator
 
         $filesystem = new Filesystem(
             new SymfonyFilesystem(),
-            new ContainerDumperFactory(),
-            $this->configuration->getContainerFilePath()
+            new ContainerDumperFactory()
         );
 
         $builder = new Builder(

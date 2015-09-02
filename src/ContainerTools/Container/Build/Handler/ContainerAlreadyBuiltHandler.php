@@ -12,6 +12,7 @@ class ContainerAlreadyBuiltHandler extends Handler
      * @var ContainerLoader
      */
     private $containerLoader;
+
     /**
      * @var Filesystem
      */

@@ -20,7 +20,8 @@ class RebuildContainerHandler extends Handler
     private $filesystem;
 
     /**
-     * RebuildContainerHandler constructor.
+     * @param Compiler $compiler
+     * @param Filesystem $filesystem
      */
     public function __construct(Compiler $compiler, Filesystem $filesystem)
     {
@@ -32,7 +33,7 @@ class RebuildContainerHandler extends Handler
     {
         $container = $this->compiler->compile($request->getConfiguration());
 
-        $this->filesystem->dump($container);
+        $this->filesystem->dump($container, $request->getConfiguration()->getContainerFilePath());
 
         $request->setContainer($container);
     }
