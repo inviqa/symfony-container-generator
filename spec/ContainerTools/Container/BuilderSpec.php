@@ -44,7 +44,7 @@ class BuilderSpec extends ObjectBehavior
         $filesystem->dump($containerBuilder)->shouldNotBeCalled();
         $containerLoader->loadFrom(Argument::any())->shouldNotBeCalled();
 
-        $this->build($configuration);
+        $this->build($configuration)->shouldReturn($containerBuilder);
     }
 
 
@@ -64,7 +64,7 @@ class BuilderSpec extends ObjectBehavior
 
         $containerLoader->loadFrom(Argument::any())->shouldNotBeCalled();
 
-        $this->build($configuration);
+        $this->build($configuration)->shouldReturn($containerBuilder);
     }
 
     function it_loads_an_existing_container_if_it_exists_when_not_in_debug_mode(
@@ -76,10 +76,10 @@ class BuilderSpec extends ObjectBehavior
         $configuration->getDebug()->willReturn(false);
         $filesystem->exists(Argument::any())->willReturn(true);
 
-        $filesystem->dump($containerBuilder)->shouldNotBeCalled();
+        $filesystem->dump(Argument::any())->shouldNotBeCalled();
 
-        $containerLoader->loadFrom($this->containerFile)->shouldBeCalled();
+        $containerLoader->loadFrom($this->containerFile)->willReturn($containerBuilder);
 
-        $this->build($configuration);
+        $this->build($configuration)->shouldReturn($containerBuilder);
     }
 }

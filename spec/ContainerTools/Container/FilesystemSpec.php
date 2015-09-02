@@ -2,6 +2,7 @@
 
 namespace spec\ContainerTools\Container;
 
+use ContainerTools\Container\ContainerDumperFactory;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -12,9 +13,9 @@ class FilesystemSpec extends ObjectBehavior
 {
     private $path = '/path/file.php';
 
-    function let(Filesystem $filesystem)
+    function let(Filesystem $filesystem, ContainerDumperFactory $dumperFactory)
     {
-        $this->beConstructedWith($filesystem, $this->path);
+        $this->beConstructedWith($filesystem, $dumperFactory, $this->path);
     }
 
     function it_returns_true_if_file_exists(Filesystem $filesystem)
@@ -24,13 +25,13 @@ class FilesystemSpec extends ObjectBehavior
         $this->exists('somefile.php')->shouldReturn(true);
     }
 
-    function it_uses_container_dump_to_create_the_cache(Filesystem $filesystem)
+    function it_uses_container_dump_to_create_the_cache(Filesystem $filesystem, ContainerDumperFactory $dumperFactory, ContainerBuilder $containerBuilder, PhpDumper $dumper)
     {
-        $containerBuilder = new ContainerBuilder();
-        $dumper = new PhpDumper($containerBuilder);
+        $dumper->dump()->willReturn('file contents');
+        $dumperFactory->create($containerBuilder)->willReturn($dumper);
 
         $this->dump($containerBuilder);
 
-        $filesystem->dumpFile($this->path, $dumper->dump())->shouldHaveBeenCalled();
+        $filesystem->dumpFile($this->path, 'file contents')->shouldHaveBeenCalled();
     }
 }
