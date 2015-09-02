@@ -2,22 +2,34 @@
 
 namespace ContainerTools;
 
+use ContainerTools\Configuration\DelegatingLoaderFactory;
+use ContainerTools\Container\ContainerDumperFactory;
+use ContainerTools\Container\Filesystem;
+use ContainerTools\Container\Loader as ContainerLoader;
+use ContainerTools\Configuration\Loader as ConfigurationLoader;
+use Symfony\Component\DependencyInjection\ContainerBuilder as SymfonyContainerBuilder;
+use ContainerTools\Container\Builder;
 use Symfony\Component\DependencyInjection\Container;
-use Pimple\Container as PimpleContainer;
+use Symfony\Component\Filesystem\Filesystem as SymfonyFilesystem;
 
 class ContainerGenerator
 {
     /**
-     * @var PimpleContainer
+     * @var Container
      */
-    private $pimple;
+    private $container;
+
+    /**
+     * @var Configuration
+     */
+    private $configuration;
 
     /**
      * @param Configuration $configuration
      */
     public function __construct(Configuration $configuration)
     {
-        $this->pimple = ServiceDefinitions::create($configuration);
+        $this->configuration = $configuration;
     }
 
     /**
@@ -25,6 +37,21 @@ class ContainerGenerator
      */
     public function getContainer()
     {
-        return $this->pimple['container_builder']->build();
+        return $this->container = $this->container ?: $this->buildContainer();
+    }
+
+
+    /**
+     * @return Container
+     */
+    private function buildContainer()
+    {
+        $builder = new Builder(
+            new ConfigurationLoader(new SymfonyContainerBuilder(), new DelegatingLoaderFactory(), new SymfonyFilesystem()),
+            new ContainerLoader(),
+            new Filesystem(new SymfonyFilesystem(), new ContainerDumperFactory(), $this->configuration->getContainerFilePath())
+        );
+
+        return $builder->build($this->configuration);
     }
 }

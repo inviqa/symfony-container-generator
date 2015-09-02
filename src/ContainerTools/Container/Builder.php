@@ -25,43 +25,37 @@ class Builder
     private $filesystem;
 
     /**
-     * @var Configuration
-     */
-    private $configuration;
-
-    /**
      * @param ConfigLoader $loader
      * @param Loader $containerLoader
      * @param Filesystem $filesystem
-     * @param Configuration $configuration
      */
     public function __construct(
         ConfigLoader $loader,
         ContainerLoader $containerLoader,
-        Filesystem $filesystem,
-        Configuration $configuration
+        Filesystem $filesystem
     ) {
         $this->loader = $loader;
         $this->containerLoader = $containerLoader;
         $this->filesystem = $filesystem;
-        $this->configuration = $configuration;
     }
 
     /**
+     * @param Configuration $configuration
+     *
      * @return Container
      */
-    public function build()
+    public function build(Configuration $configuration)
     {
-        $containerFilePath = $this->configuration->getContainerFilePath();
+        $containerFilePath = $configuration->getContainerFilePath();
         $containerHasBeenBuilt = $this->filesystem->exists($containerFilePath);
-        $isDebug = $this->configuration->getDebug();
+        $isDebug = $configuration->getDebug();
 
         if ($isDebug) {
-            $container = $this->compile();
+            $container = $this->compile($configuration);
         } else if ($containerHasBeenBuilt) {
             $container = $this->containerLoader->loadFrom($containerFilePath);
         } else {
-            $container = $this->compile();
+            $container = $this->compile($configuration);
             $this->filesystem->dump($container);
         }
 
@@ -69,13 +63,15 @@ class Builder
     }
 
     /**
+     * @param Configuration $configuration
+     *
      * @return ContainerBuilder
      */
-    private function compile()
+    private function compile(Configuration $configuration)
     {
-        $container = $this->loader->loadContainer($this->configuration);
+        $container = $this->loader->loadContainer($configuration);
 
-        foreach ($this->configuration->getCompilerPasses() as $compilerPass) {
+        foreach ($configuration->getCompilerPasses() as $compilerPass) {
             $container->addCompilerPass($compilerPass);
         }
 
