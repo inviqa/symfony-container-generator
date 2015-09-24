@@ -1,5 +1,5 @@
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/inviqa/symfony-container-generator/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/inviqa/symfony-container-generator/?branch=master)
-
+[![Build Status](https://scrutinizer-ci.com/g/inviqa/symfony-container-generator/badges/build.png?b=master)](https://scrutinizer-ci.com/g/inviqa/symfony-container-generator/build-status/master)
 # symfony-container-generator
 Generates and caches a standalone Symfony DI container.
 
