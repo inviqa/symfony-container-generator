@@ -48,8 +48,7 @@ class Loader
         ContainerBuilder $containerBuilder,
         DelegatingLoaderFactory $delegatingLoaderFactory,
         Filesystem $filesystem
-    )
-    {
+    ) {
         $this->containerBuilder = $containerBuilder;
         $this->delegatingLoaderFactory = $delegatingLoaderFactory;
         $this->filesystem = $filesystem;

@@ -10,12 +10,12 @@ use Symfony\Component\DependencyInjection\Container;
 class Builder
 {
     /**
-     * @var Loader
+     * @var ConfigLoader
      */
     private $loader;
 
     /**
-     * @var Loader
+     * @var ContainerLoader
      */
     private $containerLoader;
 
@@ -26,7 +26,7 @@ class Builder
 
     /**
      * @param ConfigLoader $loader
-     * @param Loader $containerLoader
+     * @param ContainerLoader $containerLoader
      * @param Filesystem $filesystem
      */
     public function __construct(
@@ -65,7 +65,7 @@ class Builder
     /**
      * @param Configuration $configuration
      *
-     * @return ContainerBuilder
+     * @return Container
      */
     private function compile(Configuration $configuration)
     {
