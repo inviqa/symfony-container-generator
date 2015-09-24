@@ -3,6 +3,11 @@
 namespace ContainerTools;
 
 use ContainerTools\Configuration\DelegatingLoaderFactory;
+use ContainerTools\Container\Build\BuildChain;
+use ContainerTools\Container\Build\Handler\ContainerAlreadyBuiltHandler;
+use ContainerTools\Container\Build\Handler\DebugModeHandler;
+use ContainerTools\Container\Build\Handler\RebuildContainerHandler;
+use ContainerTools\Container\Compiler;
 use ContainerTools\Container\ContainerDumperFactory;
 use ContainerTools\Container\Filesystem;
 use ContainerTools\Container\Loader as ContainerLoader;
@@ -46,10 +51,25 @@ class ContainerGenerator
      */
     private function buildContainer()
     {
+        $configurationLoader = new ConfigurationLoader(
+            new SymfonyContainerBuilder(),
+            new DelegatingLoaderFactory(),
+            new SymfonyFilesystem()
+        );
+
+        $compiler = new Compiler($configurationLoader);
+
+        $filesystem = new Filesystem(
+            new SymfonyFilesystem(),
+            new ContainerDumperFactory()
+        );
+
         $builder = new Builder(
-            new ConfigurationLoader(new SymfonyContainerBuilder(), new DelegatingLoaderFactory(), new SymfonyFilesystem()),
-            new ContainerLoader(),
-            new Filesystem(new SymfonyFilesystem(), new ContainerDumperFactory(), $this->configuration->getContainerFilePath())
+            new BuildChain(
+                new DebugModeHandler($compiler),
+                new ContainerAlreadyBuiltHandler(new ContainerLoader(), $filesystem),
+                new RebuildContainerHandler($compiler, $filesystem)
+            )
         );
 
         return $builder->build($this->configuration);

@@ -27,9 +27,8 @@ class Filesystem
      * @param ContainerDumperFactory $dumperFactory
      * @param string $containerFilePath
      */
-    public function __construct(SymfonyFilesystem $filesystem, ContainerDumperFactory $dumperFactory, $containerFilePath)
+    public function __construct(SymfonyFilesystem $filesystem, ContainerDumperFactory $dumperFactory)
     {
-        $this->containerFilePath = $containerFilePath;
         $this->filesystem = $filesystem;
         $this->dumperFactory = $dumperFactory;
     }
@@ -37,10 +36,10 @@ class Filesystem
     /**
      * @param ContainerBuilder $containerBuilder
      */
-    public function dump(ContainerBuilder $containerBuilder)
+    public function dump(ContainerBuilder $containerBuilder, $containerFilePath)
     {
         $dumper = $this->dumperFactory->create($containerBuilder);
-        $this->filesystem->dumpFile($this->containerFilePath, $dumper->dump());
+        $this->filesystem->dumpFile($containerFilePath, $dumper->dump());
     }
 
     public function exists($file)

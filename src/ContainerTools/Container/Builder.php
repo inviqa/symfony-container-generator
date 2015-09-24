@@ -3,40 +3,23 @@
 namespace ContainerTools\Container;
 
 use ContainerTools\Configuration;
-use ContainerTools\Configuration\Loader as ConfigLoader;
-use ContainerTools\Container\Loader as ContainerLoader;
+use ContainerTools\Container\Build\BuildChain;
+use ContainerTools\Container\Build\Request;
 use Symfony\Component\DependencyInjection\Container;
 
 class Builder
 {
     /**
-     * @var Loader
+     * @var BuildChain
      */
-    private $loader;
+    private $buildHandler;
 
     /**
-     * @var Loader
+     * @param BuildChain $buildHandler
      */
-    private $containerLoader;
-
-    /**
-     * @var Filesystem
-     */
-    private $filesystem;
-
-    /**
-     * @param ConfigLoader $loader
-     * @param Loader $containerLoader
-     * @param Filesystem $filesystem
-     */
-    public function __construct(
-        ConfigLoader $loader,
-        ContainerLoader $containerLoader,
-        Filesystem $filesystem
-    ) {
-        $this->loader = $loader;
-        $this->containerLoader = $containerLoader;
-        $this->filesystem = $filesystem;
+    public function __construct(BuildChain $buildHandler)
+    {
+        $this->buildHandler = $buildHandler;
     }
 
     /**
@@ -46,37 +29,11 @@ class Builder
      */
     public function build(Configuration $configuration)
     {
-        $containerFilePath = $configuration->getContainerFilePath();
-        $containerHasBeenBuilt = $this->filesystem->exists($containerFilePath);
-        $isDebug = $configuration->getDebug();
+        $containerRequest = new Request($configuration);
 
-        if ($isDebug) {
-            $container = $this->compile($configuration);
-        } else if ($containerHasBeenBuilt) {
-            $container = $this->containerLoader->loadFrom($containerFilePath);
-        } else {
-            $container = $this->compile($configuration);
-            $this->filesystem->dump($container);
-        }
+        $this->buildHandler->process($containerRequest);
 
-        return $container;
+        return $containerRequest->getContainer();
     }
 
-    /**
-     * @param Configuration $configuration
-     *
-     * @return ContainerBuilder
-     */
-    private function compile(Configuration $configuration)
-    {
-        $container = $this->loader->loadContainer($configuration);
-
-        foreach ($configuration->getCompilerPasses() as $compilerPass) {
-            $container->addCompilerPass($compilerPass);
-        }
-
-        $container->compile();
-
-        return $container;
-    }
 }
