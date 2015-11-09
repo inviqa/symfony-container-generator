@@ -9,7 +9,8 @@ Create a new Configuration object
 $generatorConfiguration = ContainerTools\Configuration::fromParameters(
     '/var/cache/container.php',              // name of file for compiled container
     ['/etc/services/', '/project/services'], // where to expect services.xml and services_test.xml
-    true|false,                              // debug mode - doesn't cache or generate container.php if true
+    true |                                   // debug mode - caches container.php with meta file and only regenerates when resources are modified
+    false,                                   // production mode - caches container.php and doesn't regenerate unless deleted
     'xml'|'yml'                              // services extension 'xml' or 'yml'
 );
 ```
@@ -33,3 +34,5 @@ $generatorConfiguration->setTestEnvironment(true);
 ```
 
 If any service_test.xml files exist they will be loaded subsequently. Symfonys' configuration loader will merge the configurations and override test service definitions with production ones. (similarly for services.yml if 'yml' is configured)
+
+As of version 0.3.0 ContainerGenerator uses the ConfigCache component, which keeps track of resources and regenerated the cached container only when a resource is modified. This means that if debug mode is enabled, a file called '/var/cache/container.php.meta' will be generated in the same folder as the cached container.
