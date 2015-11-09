@@ -166,26 +166,6 @@ class FeatureContext implements Context
         }
     }
 
-
-    /**
-     * @Given the cached container and meta files already exist
-     */
-    public function theCachedContainerAndMetaFilesAlreadyExist()
-    {
-        copy('features/dummy/regenerated.container.cache.php', 'container.cache.php');
-        copy('features/dummy/container.cache.php.meta', 'container.cache.php.meta');
-
-        if (!file_exists($this->cachedContainerFile)) {
-            throw new RuntimeException(sprintf('Expected cached container file %s to exist.', $this->cachedContainerFile));
-        }
-
-        if (!file_exists($this->cachedContainerMetaFile)) {
-            throw new RuntimeException(sprintf('Expected cached container meta file %s to exist.', $this->cachedContainerMetaFile));
-        }
-        var_dump(stat('container.cache.php.meta')[9]);
-        var_dump(stat('features/etc/services.xml')[9]);
-    }
-
     /**
      * @Given the cached container and meta files have already been generated
      */
@@ -195,11 +175,21 @@ class FeatureContext implements Context
     }
 
     /**
+     * @Given the cached container and meta files have already been generated from preexisting
+     */
+    public function theCachedContainerAndMetaFilesHaveAlreadyBeenGeneratedFromPreexisting()
+    {
+        $this->configuration = Configuration::fromParameters($this->cachedContainerFile, ['features/preexisting/'], true, 'xml');
+
+        $this->iGenerateTheContainer();
+    }
+
+    /**
      * @Then I should receive an instance of the existing container
      */
     public function iShouldReceiveAnInstanceOfTheExistingContainer()
     {
-        var_dump($this->generatedServices);
+
         $this->assertHasService('preexisting');
     }
 
