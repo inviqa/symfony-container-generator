@@ -7,6 +7,7 @@ use ContainerTools\Container\ContainerDumperFactory;
 use ContainerTools\Container\Filesystem;
 use ContainerTools\Container\Loader as ContainerLoader;
 use ContainerTools\Configuration\Loader as ConfigurationLoader;
+use Symfony\Component\Config\ConfigCache;
 use Symfony\Component\DependencyInjection\ContainerBuilder as SymfonyContainerBuilder;
 use ContainerTools\Container\Builder;
 use Symfony\Component\DependencyInjection\Container;
@@ -46,10 +47,12 @@ class ContainerGenerator
      */
     private function buildContainer()
     {
+        $containerConfigCache = new ConfigCache($this->configuration->getContainerFilePath(), $this->configuration->getDebug());
+
         $builder = new Builder(
             new ConfigurationLoader(new SymfonyContainerBuilder(), new DelegatingLoaderFactory(), new SymfonyFilesystem()),
             new ContainerLoader(),
-            new Filesystem(new SymfonyFilesystem(), new ContainerDumperFactory(), $this->configuration->getContainerFilePath())
+            new Filesystem(new SymfonyFilesystem(), new ContainerDumperFactory(), $containerConfigCache)
         );
 
         return $builder->build($this->configuration);

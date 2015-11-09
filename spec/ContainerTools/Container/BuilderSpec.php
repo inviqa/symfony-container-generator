@@ -18,6 +18,7 @@ class BuilderSpec extends ObjectBehavior
         Loader $loader,
         ContainerLoader $containerLoader,
         Filesystem $filesystem,
+        ContainerBuilder $containerBuilder,
         Configuration $configuration
     ) {
         $configuration->getServicesFormat()->willReturn('xml');
@@ -25,60 +26,39 @@ class BuilderSpec extends ObjectBehavior
         $configuration->getContainerFilePath()->willReturn($this->containerFile);
         $configuration->getCompilerPasses()->willReturn([]);
 
+        $containerLoader->loadFrom($this->containerFile)->willReturn($containerBuilder);
+
         $this->beConstructedWith($loader, $containerLoader, $filesystem);
     }
 
-    function it_does_not_cache_the_container_when_in_debug_mode(
-        Loader $loader,
-        ContainerBuilder $containerBuilder,
-        ContainerLoader $containerLoader,
-        Filesystem $filesystem,
-        Configuration $configuration
-    ) {
-        $configuration->getDebug()->willReturn(true);
-        $filesystem->exists(Argument::any())->willReturn();
-        $loader->loadContainer($configuration)->willReturn($containerBuilder);
-
-        $containerBuilder->compile()->shouldBeCalled();
-
-        $filesystem->dump($containerBuilder)->shouldNotBeCalled();
-        $containerLoader->loadFrom(Argument::any())->shouldNotBeCalled();
-
-        $this->build($configuration)->shouldReturn($containerBuilder);
-    }
-
-
-    function it_builds_and_caches_a_new_container_if_none_exists_yet_when_not_in_debug_mode(
+    function it_builds_and_caches_a_new_container_if_none_exists_yet_when_and_cache_is_not_fresh(
         Loader $loader,
         ContainerLoader $containerLoader,
         ContainerBuilder $containerBuilder,
         Filesystem $filesystem,
         Configuration $configuration
     ) {
-        $configuration->getDebug()->willReturn(false);
-        $filesystem->exists(Argument::any())->willReturn(false);
+        $filesystem->isCacheFresh()->willReturn(false);
+
         $loader->loadContainer($configuration)->willReturn($containerBuilder);
 
         $containerBuilder->compile()->shouldBeCalled();
         $filesystem->dump($containerBuilder)->shouldBeCalled();
 
-        $containerLoader->loadFrom(Argument::any())->shouldNotBeCalled();
-
         $this->build($configuration)->shouldReturn($containerBuilder);
     }
 
-    function it_loads_an_existing_container_if_it_exists_when_not_in_debug_mode(
+    function it_loads_an_existing_container_if_cache_is_fresh(
         ContainerBuilder $containerBuilder,
         ContainerLoader $containerLoader,
         Filesystem $filesystem,
-        Configuration $configuration
+        Configuration $configuration,
+        Loader $loader
     ) {
-        $configuration->getDebug()->willReturn(false);
-        $filesystem->exists(Argument::any())->willReturn(true);
+        $filesystem->isCacheFresh()->willReturn(true);
 
         $filesystem->dump(Argument::any())->shouldNotBeCalled();
-
-        $containerLoader->loadFrom($this->containerFile)->willReturn($containerBuilder);
+        $loader->loadContainer(Argument::any())->shouldNotBeCalled();
 
         $this->build($configuration)->shouldReturn($containerBuilder);
     }
