@@ -9,7 +9,7 @@ build:
     tests:
         override:
             - ./bin/phpspec run --format=dot
-            - ./bin/behat --format=progress
+            - ./bin/behat --format=pretty
     project_setup:
         before: ~
         after: ~

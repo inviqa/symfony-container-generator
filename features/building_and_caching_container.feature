@@ -16,7 +16,7 @@ Feature: Generating, building and caching a container
 
   Scenario: Not regenerating container and meta files in debug mode if resource not changed
     Given I am in debug mode
-    And the cached container and meta files already exist
+    And the cached container and meta files have already been generated from preexisting
     When I generate the container
     Then I should receive an instance of the existing container
 
