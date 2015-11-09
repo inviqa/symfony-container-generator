@@ -46,20 +46,12 @@ class Builder
      */
     public function build(Configuration $configuration)
     {
-        $containerFilePath = $configuration->getContainerFilePath();
-        $containerHasBeenBuilt = $this->filesystem->exists($containerFilePath);
-        $isDebug = $configuration->getDebug();
-
-        if ($isDebug) {
-            $container = $this->compile($configuration);
-        } else if ($containerHasBeenBuilt) {
-            $container = $this->containerLoader->loadFrom($containerFilePath);
-        } else {
+        if (!$this->filesystem->isCacheFresh()) {
             $container = $this->compile($configuration);
             $this->filesystem->dump($container);
         }
 
-        return $container;
+        return $this->containerLoader->loadFrom($configuration->getContainerFilePath());
     }
 
     /**

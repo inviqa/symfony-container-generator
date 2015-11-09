@@ -30,8 +30,9 @@ class ProjectServiceContainer extends Container
         $this->scopes = array();
         $this->scopeChildren = array();
         $this->methodMap = array(
-            'dummy' => 'getDummyService'
+            'preexisting' => 'getPreexistingService',
         );
+
         $this->aliases = array();
     }
 
@@ -43,8 +44,16 @@ class ProjectServiceContainer extends Container
         throw new LogicException('You cannot compile a dumped frozen container.');
     }
 
-    protected function getDummyService()
+    /**
+     * Gets the 'preexisting' service.
+     *
+     * This service is shared.
+     * This method always returns the same instance of the service.
+     *
+     * @return \PreExisting A PreExisting instance.
+     */
+    protected function getPreexistingService()
     {
-        return $this->services['dummy'] = new \DateTime();
+        return $this->services['preexisting'] = new \PreExisting();
     }
 }

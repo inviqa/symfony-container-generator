@@ -1,17 +1,14 @@
 <?php
 
-use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Behat\Context\Context;
 use Behat\Behat\Context\SnippetAcceptingContext;
 use ContainerTools\Configuration;
-use ContainerTools\ContainerGenerator;
 use Symfony\Component\DependencyInjection\Container;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
  * Defines application features from the specific context.
  */
-class FeatureContext implements Context, SnippetAcceptingContext
+class FeatureContext implements Context
 {
     /**
      * @var Configuration
@@ -21,17 +18,13 @@ class FeatureContext implements Context, SnippetAcceptingContext
     /**
      * @var Container
      */
-    private $generatedContainer;
+    private $generatedServices;
 
     /**
      * @var string
      */
     private $cachedContainerFile = 'container.cache.php';
-
-    /**
-     * @var int
-     */
-    private $containerStat = 0;
+    private $cachedContainerMetaFile = 'container.cache.php.meta';
 
     /**
      * @var Exception
@@ -58,9 +51,15 @@ class FeatureContext implements Context, SnippetAcceptingContext
             unlink($this->cachedContainerFile);
         }
 
+        if (file_exists($this->cachedContainerMetaFile)) {
+            unlink($this->cachedContainerMetaFile);
+        }
+
         if (file_exists('features/etc/services_test.xml')) {
             unlink('features/etc/services_test.xml');
         }
+
+        copy('features/dummy/services.xml', 'features/etc/services.xml');
     }
 
     /**
@@ -76,13 +75,12 @@ class FeatureContext implements Context, SnippetAcceptingContext
      */
     public function iGenerateTheContainer()
     {
-        $container = new ContainerGenerator($this->configuration);
+        $serviceFolders = implode(',', $this->configuration->getServicesFolders());
+        $isDebug = $this->configuration->getDebug() ? 'true' : 'false';
+        $isTest = $this->configuration->isTestEnvironment() ? 'true' : 'false';
+        exec('php features/bootstrap/generate.php ' . $serviceFolders . ' '. $isDebug. ' '. $isTest);
 
-        try {
-            $this->generatedContainer = $container->getContainer();
-        } catch (Exception $e) {
-            $this->generatorException = $e;
-        }
+        $this->generatedServices = unserialize(file_get_contents('serialized.container'));
     }
 
     /**
@@ -90,7 +88,16 @@ class FeatureContext implements Context, SnippetAcceptingContext
      */
     public function iShouldReceiveAnInstanceOfThatContainer()
     {
-        expect($this->generatedContainer)->toBeAnInstanceOf(ContainerBuilder::class);
+        $this->assertHasService('my_service1');
+        $this->assertNotHasService('preexisting');
+    }
+
+    /**
+     * @Then I should receive an instance of the regenerated container
+     */
+    public function iShouldReceiveAnInstanceOfTheRegeneratedServices()
+    {
+        $this->assertHasService('my_modified_service1');
     }
 
     /**
@@ -111,6 +118,10 @@ class FeatureContext implements Context, SnippetAcceptingContext
         if (file_exists($this->cachedContainerFile)) {
             throw new RuntimeException('Cached container file should not exist prior to scenario');
         }
+
+        if (file_exists($this->cachedContainerMetaFile)) {
+            throw new RuntimeException('Cached container meta file should not exist prior to scenario');
+        }
     }
 
     /**
@@ -129,11 +140,18 @@ class FeatureContext implements Context, SnippetAcceptingContext
         if (!file_exists($this->cachedContainerFile)) {
             throw new RuntimeException(sprintf('Cache file %s should have been created.', $this->cachedContainerFile));
         }
+    }
 
-        require_once($this->cachedContainerFile);
-        $container = new \ProjectServiceContainer();
+    /**
+     * @Then it should be cached in a file with a meta file
+     */
+    public function itShouldBeCachedInAFileWithAMetaFile()
+    {
+        $this->itShouldBeCachedInAFile();
 
-        expect($container)->toBeAnInstanceOf(Container::class);
+        if (!file_exists($this->cachedContainerMetaFile)) {
+            throw new RuntimeException(sprintf('Cache meta file %s should have been created.', $this->cachedContainerMetaFile));
+        }
     }
 
     /**
@@ -141,13 +159,37 @@ class FeatureContext implements Context, SnippetAcceptingContext
      */
     public function theCachedContainerFileAlreadyExists()
     {
-        copy('features/dummy/container.cache.php', 'container.cache.php');
+        copy('features/dummy/preexisting.container.cache.php', 'container.cache.php');
+
+        if (!file_exists($this->cachedContainerFile)) {
+            throw new RuntimeException(sprintf('Expected cached container file %s to exist.', $this->cachedContainerFile));
+        }
+    }
+
+
+    /**
+     * @Given the cached container and meta files already exist
+     */
+    public function theCachedContainerAndMetaFilesAlreadyExist()
+    {
+        copy('features/dummy/regenerated.container.cache.php', 'container.cache.php');
+        copy('features/dummy/container.cache.php.meta', 'container.cache.php.meta');
 
         if (!file_exists($this->cachedContainerFile)) {
             throw new RuntimeException(sprintf('Expected cached container file %s to exist.', $this->cachedContainerFile));
         }
 
-        $this->containerStat = stat($this->cachedContainerFile);
+        if (!file_exists($this->cachedContainerMetaFile)) {
+            throw new RuntimeException(sprintf('Expected cached container meta file %s to exist.', $this->cachedContainerMetaFile));
+        }
+    }
+
+    /**
+     * @Given the cached container and meta files have already been generated
+     */
+    public function theCachedContainerAndMetaFilesHaveAlreadyBeenGenerated()
+    {
+        $this->iGenerateTheContainer();
     }
 
     /**
@@ -155,8 +197,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
      */
     public function iShouldReceiveAnInstanceOfTheExistingContainer()
     {
-        expect($this->generatedContainer)->toBeAnInstanceOf(Container::class);
-        expect($this->containerStat)->toBe(stat($this->cachedContainerFile));
+        $this->assertHasService('preexisting');
     }
 
     /**
@@ -170,7 +211,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
     /**
      * @Given the test environment is set
      */
-    public function theTestEnvironemtnIsSet()
+    public function theTestEnvironmetnIsSet()
     {
         $this->configuration = Configuration::fromParameters($this->cachedContainerFile, ['features/etc/'], true, 'xml');
 
@@ -182,7 +223,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
      */
     public function theTestServicesShouldBeAvailable()
     {
-        expect($this->generatedContainer->has('test_service'))->toBe(true);
+        $this->assertHasService('test_service');
     }
 
     /**
@@ -216,8 +257,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
      */
     public function theTestServicesShouldNotBeAvailable()
     {
-        expect($this->generatedContainer->has('test_service'))->toBe(false);
-
+        $this->assertNotHasService('test_service');
     }
 
     /**
@@ -228,7 +268,6 @@ class FeatureContext implements Context, SnippetAcceptingContext
         $folder1 = 'features/'.$folder1;
         $folder2 = 'features/'.$folder2;
         $this->configuration = Configuration::fromParameters($this->cachedContainerFile, [$folder1, $folder2], true, 'xml');
-
     }
 
     /**
@@ -236,7 +275,36 @@ class FeatureContext implements Context, SnippetAcceptingContext
      */
     public function itShouldContainServicesFromBothFiles()
     {
-        expect($this->generatedContainer->has('my_service1'))->toBe(true);
-        expect($this->generatedContainer->has('my_service2'))->toBe(true);
+        $this->assertHasService('my_service1');
+        $this->assertHasService('my_service2');
+    }
+
+    /**
+     * @Given I have modified one of the resources
+     */
+    public function iModifyOneOfTheResources()
+    {
+        sleep(1); // otherwise symfony CacheConfig won't pick up on changed timestamp
+        copy('features/dummy/modified_services.xml', 'features/etc/services.xml');
+    }
+
+    /**
+     * @param $service
+     */
+    private function assertHasService($service)
+    {
+        if (!in_array($service, $this->generatedServices)) {
+            throw new RuntimeException(sprintf('Expected container to contain %s service', $service));
+        }
+    }
+
+    /**
+     * @param $service
+     */
+    private function assertNotHasService($service)
+    {
+        if (in_array($service, $this->generatedServices)) {
+            throw new RuntimeException(sprintf('Expected container to not contain %s service', $service));
+        }
     }
 }
