@@ -1,7 +1,7 @@
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/inviqa/symfony-container-generator/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/inviqa/symfony-container-generator/?branch=master)
 [![Build Status](https://scrutinizer-ci.com/g/inviqa/symfony-container-generator/badges/build.png?b=master)](https://scrutinizer-ci.com/g/inviqa/symfony-container-generator/build-status/master)
 # symfony-container-generator
-Generates and caches a standalone Symfony DI container.
+Generates and caches a standalone Symfony DI container. You can use this to easily use Symfonys DI Conatiner in any legacy project, all you need to provide is a list of folders where the DI Container configuration is stored, whether you are in debug or production mode, and the format your configuration files are in.
 
 ## Usage
 Create a new Configuration object
