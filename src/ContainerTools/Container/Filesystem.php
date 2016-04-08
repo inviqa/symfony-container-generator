@@ -9,6 +9,11 @@ use Symfony\Component\Filesystem\Filesystem as SymfonyFilesystem;
 class Filesystem
 {
     /**
+     * @var string
+     */
+    private $containerFilePath;
+
+    /**
      * @var SymfonyFilesystem
      */
     private $filesystem;
