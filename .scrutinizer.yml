@@ -18,7 +18,7 @@ build:
         before: ~
         after: ~
     cache:
-        directories: [vendor/, bin/, ~/.composer/cache ]
+        directories: [ bin/, ~/.composer/cache ]
 
 filter:
     paths: [src/*]
