@@ -4,15 +4,21 @@ build:
     environment:
         php: '5.5.25'
     dependencies:
+        before:
+            - date -u +"%Y-%m-%dT%H:%M:%SZ" > /tmp/build-start-time.txt
         override:
             - { command: 'composer install --no-interaction --prefer-source', idle_timeout: 600 }
     tests:
         override:
             - ./bin/phpspec run --format=dot
             - ./bin/behat --format=pretty
+        after:
+            - SCRUTINIZER_START_TIME=$(cat /tmp/build-start-time.txt) sh -c 'curl -sS https://gist.githubusercontent.com/tonypiper/fd3cf9a67b71d4e3928c/raw/152f1d873f98ff4256ca8bc3041443eae7c890b4/keenio-logger.php | php'
     project_setup:
         before: ~
         after: ~
+    cache:
+        directories: [vendor/, bin/, ~/.composer/cache ]
 
 filter:
     paths: [src/*]
