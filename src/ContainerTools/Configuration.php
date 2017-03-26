@@ -109,6 +109,20 @@ class Configuration
     }
 
     /**
+     * This method here is for backwards capability and should not be used
+     *
+     * @param bool $isTestEnv
+     * @deprecated
+     */
+    public function setTestEnvironment($isTestEnv)
+    {
+        if($isTestEnv === true)
+        {
+            $this->environment = "test";
+        }
+    }
+
+    /**
      * @return array CompilerPassInterface
      */
     public function getCompilerPasses()
