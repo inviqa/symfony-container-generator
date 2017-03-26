@@ -23,10 +23,29 @@ class LoaderSpec extends ObjectBehavior
         $this->beConstructedWith($containerBuilder, $delegatingLoaderFactory, $filesystem);
 
         $configuration->getServicesFormat()->willReturn('xml');
-        $configuration->isTestEnvironment()->willReturn(false);
+        $configuration->getEnvironment()->willReturn('prod');
     }
 
     function it_loads_services_into_a_container(
+        Configuration $configuration,
+        ContainerBuilder $containerBuilder,
+        DelegatingLoaderFactory $delegatingLoaderFactory,
+        DelegatingLoader $delegatingLoader,
+        Filesystem $filesystem
+    ) {
+        $configuration->getServicesFolders()->willReturn(['etc1']);
+
+
+
+        $delegatingLoaderFactory->create($containerBuilder, 'etc1')->willReturn($delegatingLoader);
+        $filesystem->exists('etc1/services.xml')->willReturn(true);
+
+        $this->loadContainer($configuration)->shouldReturnAnInstanceOf(Container::class);
+
+        $delegatingLoader->load('services.xml')->shouldBeCalled();
+    }
+
+    function it_does_not_try_to_load_prod_environment_specific_service_definitions(
         Configuration $configuration,
         ContainerBuilder $containerBuilder,
         DelegatingLoaderFactory $delegatingLoaderFactory,
@@ -40,7 +59,8 @@ class LoaderSpec extends ObjectBehavior
 
         $this->loadContainer($configuration)->shouldReturnAnInstanceOf(Container::class);
 
-        $delegatingLoader->load('services.xml')->shouldHaveBeenCalled();
+        $delegatingLoader->load('services.xml')->shouldBeCalled();
+        $delegatingLoader->load('services_prod.xml')->shouldNotBeCalled();
     }
 
 
@@ -55,6 +75,7 @@ class LoaderSpec extends ObjectBehavior
 
         $delegatingLoaderFactory->create($containerBuilder, 'etc1')->willReturn($delegatingLoader);
         $filesystem->exists('etc1/services.xml')->willReturn(false);
+        $filesystem->exists('etc1/services_prod.xml')->willReturn(false);
 
         $this->loadContainer($configuration)->shouldReturnAnInstanceOf(Container::class);
 
@@ -83,7 +104,7 @@ class LoaderSpec extends ObjectBehavior
         $delegatingLoader2->load('services.xml')->shouldHaveBeenCalled();
     }
 
-    function it_loads_services_into_a_container_including_test_services(
+    function it_loads_services_into_a_container_including_environment_specific_services(
         Configuration $configuration,
         ContainerBuilder $containerBuilder,
         DelegatingLoaderFactory $delegatingLoaderFactory,
@@ -92,7 +113,7 @@ class LoaderSpec extends ObjectBehavior
         Filesystem $filesystem
     ) {
         $configuration->getServicesFolders()->willReturn(['etc1', 'etc2']);
-        $configuration->isTestEnvironment()->willReturn(true);
+        $configuration->getEnvironment()->willReturn("test");
 
         $delegatingLoaderFactory->create($containerBuilder, 'etc1')->willReturn($delegatingLoader1);
         $delegatingLoaderFactory->create($containerBuilder, 'etc2')->willReturn($delegatingLoader2);
@@ -110,25 +131,4 @@ class LoaderSpec extends ObjectBehavior
         $delegatingLoader2->load('services_test.xml')->shouldHaveBeenCalled();
     }
 
-
-    function it_skips_loading_test_services_if_none_exist(
-        Configuration $configuration,
-        ContainerBuilder $containerBuilder,
-        DelegatingLoaderFactory $delegatingLoaderFactory,
-        DelegatingLoader $delegatingLoader,
-        Filesystem $filesystem
-    ) {
-        $configuration->getServicesFolders()->willReturn(['etc1']);
-        $configuration->isTestEnvironment()->willReturn(true);
-
-        $delegatingLoaderFactory->create($containerBuilder, 'etc1')->willReturn($delegatingLoader);
-        $filesystem->exists('etc1/services.xml')->willReturn(true);
-        $filesystem->exists('etc1/services_test.xml')->willReturn(false);
-
-        $this->loadContainer($configuration)->shouldReturnAnInstanceOf(Container::class);
-
-        $delegatingLoader->load('services.xml')->shouldHaveBeenCalled();
-
-        $delegatingLoader->load('services_test.xml')->shouldNotHaveBeenCalled();
-    }
 }

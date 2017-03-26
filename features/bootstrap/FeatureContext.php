@@ -77,8 +77,8 @@ class FeatureContext implements Context
     {
         $serviceFolders = implode(',', $this->configuration->getServicesFolders());
         $isDebug = $this->configuration->getDebug() ? 'true' : 'false';
-        $isTest = $this->configuration->isTestEnvironment() ? 'true' : 'false';
-        exec('php features/bootstrap/generate.php ' . $serviceFolders . ' '. $isDebug. ' '. $isTest);
+        $env = $this->configuration->getEnvironment();
+        exec('php features/bootstrap/generate.php ' . $serviceFolders . ' '. $isDebug. ' '. $env);
 
         $this->generatedServices = unserialize(file_get_contents('serialized.container'));
     }
@@ -194,29 +194,27 @@ class FeatureContext implements Context
     }
 
     /**
-     * @Given I have test services
+     * @Given I have :env environment services
      */
-    public function iHaveTestServices()
+    public function iHaveEnvironmentServices($env)
     {
-        copy('features/dummy/services_test.xml', 'features/etc/services_test.xml');
+        copy("features/dummy/services_{$env}.xml", "features/etc/services_{$env}.xml");
     }
 
     /**
-     * @Given the test environment is set
+     * @Given the environment is set to :env
      */
-    public function theTestEnvironmetnIsSet()
+    public function theEnvironmentIsSetTo($env)
     {
-        $this->configuration = Configuration::fromParameters($this->cachedContainerFile, ['features/etc/'], true, 'xml');
-
-        $this->configuration->setTestEnvironment(true);
+        $this->configuration = Configuration::fromParameters($this->cachedContainerFile, ['features/etc/'], true, 'xml', $env);
     }
 
     /**
-     * @Then the test services should be available
+     * @Then the :env services should be available
      */
-    public function theTestServicesShouldBeAvailable()
+    public function theTestServicesShouldBeAvailable($env)
     {
-        $this->assertHasService('test_service');
+        $this->assertHasService("{$env}_service");
     }
 
     /**
