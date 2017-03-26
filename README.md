@@ -11,7 +11,8 @@ $generatorConfiguration = ContainerTools\Configuration::fromParameters(
     ['/etc/services/', '/project/services'], // where to expect services.xml and services_test.xml
     true |                                   // debug mode - caches container.php with meta file and only regenerates when resources are modified
     false,                                   // production mode - caches container.php and doesn't regenerate unless deleted
-    'xml'|'yml'                              // services extension 'xml' or 'yml'
+    'xml'|'yml',                             // services extension 'xml' or 'yml'
+    'prod'                                   // optional environment, the default value is 'prod'
 );
 ```
 
@@ -27,12 +28,12 @@ Instantiate a ContainerGenerator, and fetch the container from it:
 
 ContainerGenerator expects at least one services.xml file to exist, and will throw an exception if none are found.
 
-## Test Services
-Sometimes it's neccessary, in a test environment, to provide mock services that replace the real services, these can be provided in services_test.xml and use the configuration switch:
+## Environment Services
+Sometimes it's necessary, in specific environments, to provide mock services that replace the real services. These can be provided in services_\<environment\>.xml if the environment configuration option was used:
 ```php
 $generatorConfiguration->setTestEnvironment(true);
 ```
 
-If any service_test.xml files exist they will be loaded subsequently. Symfony's configuration loader will merge the configurations and override test service definitions with production ones. (similarly for services.yml if 'yml' is configured)
+If any service_\<environment\>.xml files exist they will be loaded subsequently. Symfony's configuration loader will merge the configurations and override environment service definitions with production ones. (similarly for services.yml if 'yml' is configured)
 
 As of version 0.3.0 ContainerGenerator uses the ConfigCache component, which keeps track of resources and regenerated the cached container only when a resource is modified. This means that if debug mode is enabled, a file called `/var/cache/container.php.meta` will be generated in the same folder as the cached container.

@@ -6,10 +6,9 @@ use ContainerTools\Configuration;
 
 $configFolders = preg_split('/,/', $argv[1]);
 $isDebug = $argv[2] == 'true';
-$isTest = $argv[3] == 'true';
+$environment = $argv[3];
 
-$config = Configuration::fromParameters('./container.cache.php', $configFolders, $isDebug, 'xml');
-$config->setTestEnvironment($isTest);
+$config = Configuration::fromParameters('./container.cache.php', $configFolders, $isDebug, 'xml', $environment);
 
 $container = new ContainerGenerator($config);
 $container->getContainer();

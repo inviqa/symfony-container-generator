@@ -3,6 +3,7 @@
 namespace ContainerTools\Configuration;
 
 use ContainerTools\Configuration;
+use Symfony\Component\Config\Loader\DelegatingLoader;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Config\Exception\FileLoaderLoadException;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -25,9 +26,9 @@ class Loader
     private $containerBuilder;
 
     /**
-     * @var bool
+     * @var string
      */
-    private $isTestEnvironment;
+    private $environment;
 
     /**
      * @var DelegatingLoaderFactory
@@ -61,7 +62,7 @@ class Loader
     {
         $this->serviceConfigs = $configuration->getServicesFolders();
         $this->servicesFormat = $configuration->getServicesFormat();
-        $this->isTestEnvironment = $configuration->isTestEnvironment();
+        $this->environment = $configuration->getEnvironment();
     }
 
     /**
@@ -88,14 +89,28 @@ class Loader
         $loader = $this->delegatingLoaderFactory->create($this->containerBuilder, $path);
 
         $servicesFile = 'services.' . $this->servicesFormat;
-        $servicesTestFile = 'services_test.' . $this->servicesFormat;
 
-        if ($this->filesystem->exists($path . '/' . $servicesFile)) {
-            $loader->load($servicesFile);
+        $this->attemptToLoad($loader, $path, $servicesFile);
+
+        // Prod services are in services.yml and therefore should not be mockable with env specific files
+        if($this->environment !== "prod")
+        {
+            $servicesEnvFile = 'services_' . $this->environment . '.' . $this->servicesFormat;
+            $this->attemptToLoad($loader, $path, $servicesEnvFile);
         }
+    }
 
-        if ($this->isTestEnvironment && $this->filesystem->exists($path . '/' . $servicesTestFile)) {
-            $loader->load($servicesTestFile);
+    /**
+     * Load and parse the file if it exists
+     *
+     * @param DelegatingLoader $loader
+     * @param string $path
+     * @param string $fileName
+     */
+    private function attemptToLoad(DelegatingLoader $loader, $path, $fileName)
+    {
+        if ($this->filesystem->exists($path . '/' . $fileName)) {
+            $loader->load($fileName);
         }
     }
 }

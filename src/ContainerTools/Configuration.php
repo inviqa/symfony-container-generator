@@ -33,34 +33,37 @@ class Configuration
     private $compilerPasses = array();
 
     /**
-     * @var bool
+     * @var string
      */
-    private $testEnvironment = false;
+    private $environment;
 
     /**
      * @param string $containerFilePath
      * @param array $servicesFolders
      * @param boolean $debug
      * @param string $servicesFormat
+     * @param string $environment
      */
-    private function __construct($containerFilePath, array $servicesFolders, $debug, $servicesFormat)
+    private function __construct($containerFilePath, array $servicesFolders, $debug, $servicesFormat, $environment = "prod")
     {
         $this->containerFilePath = $containerFilePath;
         $this->servicesFolders = $servicesFolders;
         $this->debug = $debug;
         $this->servicesFormat = $servicesFormat;
+        $this->environment = $environment;
     }
 
     /**
      * @param $containerFilePath
      * @param array $configurationFolders
-     * @param $debug
-     * @param $servicesFormat
+     * @param boolean $debug
+     * @param string $servicesFormat
+     * @param string $environment
      * @return Configuration
      */
-    public static function fromParameters($containerFilePath, array $configurationFolders, $debug, $servicesFormat)
+    public static function fromParameters($containerFilePath, array $configurationFolders, $debug, $servicesFormat, $environment = "prod")
     {
-        return new Configuration($containerFilePath, $configurationFolders, $debug, $servicesFormat);
+        return new Configuration($containerFilePath, $configurationFolders, $debug, $servicesFormat, $environment);
     }
 
     /**
@@ -96,19 +99,13 @@ class Configuration
     }
 
     /**
-     * @param bool $isTestEnv
+     * Return the current environment
+     *
+     * @return string
      */
-    public function setTestEnvironment($isTestEnv)
+    public function getEnvironment()
     {
-        $this->testEnvironment = (bool) $isTestEnv;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isTestEnvironment()
-    {
-        return (bool) $this->testEnvironment;
+        return $this->environment;
     }
 
     /**
