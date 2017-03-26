@@ -29,10 +29,7 @@ Instantiate a ContainerGenerator, and fetch the container from it:
 ContainerGenerator expects at least one services.xml file to exist, and will throw an exception if none are found.
 
 ## Environment Services
-Sometimes it's necessary, in specific environments, to provide mock services that replace the real services. These can be provided in services_\<environment\>.xml if the environment configuration option was used:
-```php
-$generatorConfiguration->setTestEnvironment(true);
-```
+Sometimes it's necessary, in specific environments, to provide mock services that replace the real services. These can be provided in services_\<environment\>.xml if the environment configuration option was used.
 
 If any service_\<environment\>.xml files exist they will be loaded subsequently. Symfony's configuration loader will merge the configurations and override environment service definitions with production ones. (similarly for services.yml if 'yml' is configured)
 
