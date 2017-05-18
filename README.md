@@ -27,6 +27,12 @@ Instantiate a ContainerGenerator, and fetch the container from it:
 
 ContainerGenerator expects at least one services.xml file to exist, and will throw an exception if none are found.
 
+If you need to define [lazy services](http://symfony.com/doc/current/service_container/lazy_services.html), install the ProxyManager Bridge package:
+ 
+```bash
+    composer require symfony/proxy-manager-bridge
+```
+
 ## Test Services
 Sometimes it's neccessary, in a test environment, to provide mock services that replace the real services, these can be provided in services_test.xml and use the configuration switch:
 ```php
